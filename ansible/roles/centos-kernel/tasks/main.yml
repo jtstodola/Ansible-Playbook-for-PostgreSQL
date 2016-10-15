@@ -1,0 +1,25 @@
+---
+
+- name: Upgrade CentOS kernel and Install systemtap and Upgrade glibc
+  yum: name={{ item }} state=latest
+  register: result
+  with_items:
+    - "kernel"
+    - "systemtap"
+    - "glibc"
+    
+- name: Restart Machine
+  command: shutdown -r now "Restarting after kernel upgrade"
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: result|changed
+  
+- name: Waiting for Server to Come Back
+  local_action: wait_for host={{ansible_host}}
+                state=started
+                port=22
+                delay=30
+                timeout=120
+  become: false
+  when: result|changed

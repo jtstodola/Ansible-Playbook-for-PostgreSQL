@@ -1,0 +1,11 @@
+---
+
+- name: Reload Postgres
+  service: 
+    name: 'postgresql-9.5 '
+    state: reloaded
+  
+- name: Restart Postgres
+  service: 
+    name: 'postgresql-9.5' 
+    state: restarted

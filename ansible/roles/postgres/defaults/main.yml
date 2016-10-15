@@ -1,0 +1,45 @@
+---
+
+# postgresql.conf
+
+postgres_listen_addresses: '*'
+postgres_port: 5432
+postgres_admin_user: 'postgres'
+postgres_default_auth_method: 'trust'
+postgres_db_encoding: 'UTF8'
+
+
+# pg_hba.conf
+
+postgres_pg_hba_default:
+  - { type: local, 
+    database: all, 
+    user: '{{postgres_admin_user}}', 
+    address: '', 
+    method: '{{postgres_default_auth_method}}', 
+    comment: '' }
+    
+  - { type: local, 
+    database: all, 
+    user: all, 
+    address: '', 
+    method: '{{postgres_default_auth_method}}', 
+    comment: '"local" is for Unix domain socket connections only' }
+
+  - { type: host, 
+    database: all, 
+    user: all, 
+    address: '127.0.0.1/32', 
+    method: '{{postgres_default_auth_method}}', 
+    comment: 'IPv4 local connections' }
+    
+  - { type: host, 
+    database: all, 
+    user: all, 
+    address: '::1/128', 
+    method: '{{postgres_default_auth_method}}', 
+    comment: 'IPv6 local connections' }
+    
+postgres_pg_hba_passwd_hosts: []
+postgres_pg_hba_trust_hosts: []
+postgres_pg_hba_custom: []

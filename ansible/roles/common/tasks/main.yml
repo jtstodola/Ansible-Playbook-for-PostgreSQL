@@ -1,0 +1,17 @@
+---
+
+- name: Intall Python bindings for SE Linux
+  yum: name={{ item }} state=present
+  with_items:
+    - libselinux-python
+    - libsemanage-python
+  when: (ansible_selinux is defined and ansible_selinux.mode == 'enforcing') 
+          or ansible_ssh_user == 'vagrant'
+          
+- name: Ensure NTP is Installed
+  yum: name=ntp state=installed
+  tags: ntp
+  
+- name: Ensure NTPD is Running and Enabled
+  service: name=ntpd state=started enabled=yes
+  tags: ntpd

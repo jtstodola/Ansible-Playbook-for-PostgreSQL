@@ -1,0 +1,20 @@
+---
+
+- name: Install Postgres Servers
+  hosts: all
+  user: vagratn
+  become: true
+  roles:
+    - { role: common,
+        tags: common }
+    - { role: centos-kernel,
+        tags: centos }
+    - { role: postgres,
+        postgres_version: 9.5,
+        postgres_db_user: 'user',
+        postgres_db_name: 'things',
+        postgres_db_pass: 'password',
+        postgres_listen_addresses: '*',
+        postgres_pg_hba_passwd_hosts: ['10.0.0.0/8', '96.116.0.0/14'],
+        tags: postgres }
+  tags: [postgres]

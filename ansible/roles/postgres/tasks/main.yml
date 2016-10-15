@@ -1,0 +1,79 @@
+---
+
+- name: Ensure psycopg2 is Installed
+  yum:
+    name: 'python-psycopg2'
+    state: present
+    
+- name: Ensure Postgres Repository RPM is Installed
+  yum:
+    name: 'https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm'
+    state: present
+    
+- name: Ensure Postgres and Extra Packages are Installed
+  yum: 
+    name: '{{item}}'
+    state: present
+  with_items:
+    - postgresql95
+    - postgresql95-server
+    - postgresql95-devel
+    - postgresql95-libs
+    - postgresql95-contrib
+    
+- name: Ensure symlink for pg_config is Installed
+  file:
+    src: /usr/pgsql-9.5/bin/pg_config
+    dest: /bin/pg_config
+    state: link
+    
+- name: Initialize Database
+  command: service postgresql-9.5 initdb
+  args:
+    creates: /var/lib/pgsql/ 9.5/data.postgresql.conf
+    
+- name: Update postgresql.conf
+  become: true
+  become_user: postgres
+  template:
+    src: postgresql.conf
+    dest: /var/lib/pgsql/9.5/data/postgresql.conf
+    
+- name: Update pg_hba.conf
+  become: true
+  become_user: postgres
+  template:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/9.5/data/pg_hba.conf
+    
+- name: Ensure Postgres is Started
+  service: 
+    name: 'postgresql-9.5'
+    state: started
+    enabled: yes
+    
+- name: Ensure Database User Exists
+  postgresql_user: 
+    name: '{{ postgres_db_user }}'
+    password: '{{ postgres_db_pass }}'
+    encrypted: '{{ postgres_db_pass_encrypted | default(false) }}'
+  when: postgres_db_user is defined
+        or postgres_db_pass is defined
+    
+- name: Drop Database if Exists
+  postgresql_db:
+    name: '{{ postgres_db_name }}'
+    state: absent
+    
+- name: Ensure Application Database Exists
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: '{{ postgres_db_name }}'
+    owner: '{{ postgres_db_user }}'
+    encoding: '{{ postgres_db_encoding }}'
+  when: postgres_db_name is defined
+        or postgres_db_user is defined
+    
+    
+    
